@@ -14,5 +14,7 @@ a progress bar and persists data in MySQL.
 
 ## Usage
 
-Navigate to `onboarding/step1.php` to start. Progress is saved through
-sessions and written to the `seller_onboarding` table.
+Visit the `onboarding/` directory (or your site's root URL) to begin.
+The included `index.php` will automatically redirect you to the first
+step of the onboarding flow. Progress is saved through sessions and
+written to the `seller_onboarding` table.
