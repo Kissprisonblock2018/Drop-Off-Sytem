@@ -1,0 +1,544 @@
+/**
+ * COMPLETE ORDER MANAGEMENT SYSTEM CONTROLLER
+ * 
+ * This system provides individual buttons for each major function and a "Run All" option
+ * Functions included:
+ * 1. Update Dashboard (Transfer marketplace & virtual orders)
+ * 2. Update Drop Offs (Merge seller drop-off data)
+ * 3. Update Transports (Manage transport workflow)
+ * 4. Update Customers (Analyze customer order groupings)
+ * 5. Update Ready for Pickup (Final status updates with management overrides)
+ */
+
+/**
+ * ========================================
+ * MAIN CONTROLLER FUNCTIONS - USE THESE
+ * ========================================
+ */
+
+/**
+ * 🚀 RUN ALL FUNCTIONS IN SEQUENCE
+ * This executes all 5 major functions in the correct order
+ */
+function runAllOrderManagementFunctions() {
+  try {
+    Logger.log('🚀 STARTING COMPLETE ORDER MANAGEMENT SYSTEM...\n');
+    
+    const results = {
+      dashboard: null,
+      dropOffs: null,
+      transports: null,
+      customers: null,
+      readyForPickup: null,
+      totalTime: 0
+    };
+    
+    const startTime = new Date();
+    let stepResults = [];
+    
+    // STEP 1: Update Dashboard (Transfer new orders)
+    Logger.log('📊 STEP 1: Updating Dashboard with new orders...');
+    try {
+      results.dashboard = runUpdateDashboard();
+      stepResults.push(`✅ Dashboard: ${results.dashboard?.message || 'Completed'}`);
+    } catch (error) {
+      stepResults.push(`❌ Dashboard: ${error.message}`);
+      Logger.log(`❌ Dashboard update failed: ${error.message}`);
+    }
+    
+    // STEP 2: Update Drop Offs (Merge seller data)
+    Logger.log('\n📦 STEP 2: Updating drop-off information...');
+    try {
+      results.dropOffs = runUpdateDropOffs();
+      stepResults.push(`✅ Drop Offs: ${results.dropOffs?.message || 'Completed'}`);
+    } catch (error) {
+      stepResults.push(`❌ Drop Offs: ${error.message}`);
+      Logger.log(`❌ Drop offs update failed: ${error.message}`);
+    }
+    
+    // STEP 3: Update Transports (Manage transport workflow)
+    Logger.log('\n🚛 STEP 3: Updating transport system...');
+    try {
+      results.transports = runUpdateTransports();
+      stepResults.push(`✅ Transports: ${results.transports?.message || 'Completed'}`);
+    } catch (error) {
+      stepResults.push(`❌ Transports: ${error.message}`);
+      Logger.log(`❌ Transport update failed: ${error.message}`);
+    }
+    
+    // STEP 4: Update Customers (Analyze customer groupings)
+    Logger.log('\n👥 STEP 4: Updating customer analysis...');
+    try {
+      results.customers = mergeDataAndUpdateReadyStatus();
+      stepResults.push(`✅ Customers: ${results.customers?.message || 'Completed'}`);
+    } catch (error) {
+      stepResults.push(`❌ Customers: ${error.message}`);
+      Logger.log(`❌ Customer update failed: ${error.message}`);
+    }
+    
+    // STEP 5: Update Ready for Pickup (Final status with overrides)
+    Logger.log('\n✅ STEP 5: Updating ready for pickup status...');
+    try {
+      results.readyForPickup = runUpdateReadyForPickup();
+      stepResults.push(`✅ Ready for Pickup: ${results.readyForPickup?.message || 'Completed'}`);
+    } catch (error) {
+      stepResults.push(`❌ Ready for Pickup: ${error.message}`);
+      Logger.log(`❌ Ready for pickup update failed: ${error.message}`);
+    }
+    
+    const endTime = new Date();
+    results.totalTime = Math.round((endTime - startTime) / 1000);
+    
+    // Prepare summary message
+    const successCount = stepResults.filter(step => step.startsWith('✅')).length;
+    const totalSteps = stepResults.length;
+    
+    const summaryMessage = `Order Management System Complete!\n\n` +
+      `Completed: ${successCount}/${totalSteps} functions\n` +
+      `Total time: ${results.totalTime} seconds\n\n` +
+      `Results:\n${stepResults.join('\n')}`;
+    
+    Logger.log(`\n🎯 COMPLETE ORDER MANAGEMENT SUMMARY:`);
+    Logger.log(`Success rate: ${successCount}/${totalSteps}`);
+    Logger.log(`Total execution time: ${results.totalTime} seconds`);
+    stepResults.forEach(result => Logger.log(`  ${result}`));
+    
+    // Show UI alert with results
+    SpreadsheetApp.getUi().alert('Order Management Complete', summaryMessage, SpreadsheetApp.getUi().ButtonSet.OK);
+    
+    return {
+      success: successCount === totalSteps,
+      results: results,
+      summary: summaryMessage,
+      executionTime: results.totalTime
+    };
+    
+  } catch (error) {
+    Logger.log(`❌ Critical error in runAllOrderManagementFunctions: ${error.message}`);
+    SpreadsheetApp.getUi().alert('System Error', `Critical error: ${error.message}`, SpreadsheetApp.getUi().ButtonSet.OK);
+    throw error;
+  }
+}
+
+/**
+ * ========================================
+ * INDIVIDUAL FUNCTION CONTROLLERS
+ * ========================================
+ */
+
+/**
+ * 📊 FUNCTION 1: Update Dashboard
+ * Transfers new marketplace and virtual orders to Dashboard
+ */
+function runUpdateDashboard() {
+  try {
+    Logger.log('📊 Starting Dashboard update...');
+    
+    // Call the enhanced transfer system that handles both marketplace and virtual orders
+    const result = transferAllOrdersComplete();
+    
+    const message = `Dashboard updated! Transferred ${result.totalRecords || 0} total records ` +
+      `(${result.marketplaceRecords || 0} marketplace + ${result.virtualRecords || 0} virtual)`;
+    
+    Logger.log(`✅ Dashboard update completed: ${message}`);
+    
+    if (!result.success) {
+      throw new Error(result.message || 'Dashboard update failed');
+    }
+    
+    return {
+      success: true,
+      recordsTransferred: result.totalRecords || 0,
+      marketplaceRecords: result.marketplaceRecords || 0,
+      virtualRecords: result.virtualRecords || 0,
+      message: message
+    };
+    
+  } catch (error) {
+    Logger.log(`❌ Dashboard update error: ${error.message}`);
+    SpreadsheetApp.getUi().alert('Dashboard Update Error', `Error: ${error.message}`, SpreadsheetApp.getUi().ButtonSet.OK);
+    throw error;
+  }
+}
+
+/**
+ * 📦 FUNCTION 2: Update Drop Offs
+ * Merges seller drop-off data with Dashboard records
+ */
+function runUpdateDropOffs() {
+  try {
+    Logger.log('📦 Starting drop-offs update...');
+    
+    // Call the seller drop-off merge function
+    mergeSellerDropOffData();
+    
+    const message = 'Drop-off data merged successfully with Dashboard records';
+    
+    Logger.log(`✅ Drop-offs update completed: ${message}`);
+    
+    return {
+      success: true,
+      message: message
+    };
+    
+  } catch (error) {
+    Logger.log(`❌ Drop-offs update error: ${error.message}`);
+    SpreadsheetApp.getUi().alert('Drop Offs Update Error', `Error: ${error.message}`, SpreadsheetApp.getUi().ButtonSet.OK);
+    throw error;
+  }
+}
+
+/**
+ * 🚛 FUNCTION 3: Update Transports
+ * Manages the complete transport workflow
+ */
+function runUpdateTransports() {
+  try {
+    Logger.log('🚛 Starting transport system update...');
+    
+    // Call the complete transport management system
+    const result = runCompleteTransportSystem();
+    
+    const message = `Transport system updated! Processed ${result.dashboardProcessed || 0} items, ` +
+      `${result.addedToTransport || 0} added to transport, ${result.completedTransportsMoved || 0} completed transports moved`;
+    
+    Logger.log(`✅ Transport update completed: ${message}`);
+    
+    return {
+      success: true,
+      dashboardProcessed: result.dashboardProcessed || 0,
+      addedToTransport: result.addedToTransport || 0,
+      completedTransportsMoved: result.completedTransportsMoved || 0,
+      message: message
+    };
+    
+  } catch (error) {
+    Logger.log(`❌ Transport update error: ${error.message}`);
+    SpreadsheetApp.getUi().alert('Transport Update Error', `Error: ${error.message}`, SpreadsheetApp.getUi().ButtonSet.OK);
+    throw error;
+  }
+}
+
+/**
+ * 👥 FUNCTION 4: Update Customers
+ * Analyzes customer order groupings and counts
+ */
+function mergeDataAndUpdateReadyStatus() {
+  try {
+    Logger.log('👥 Starting customer analysis update...');
+    
+    // This function analyzes customer orders and updates groupings
+    // It's part of the mergeDataAndUpdateReadyStatus function but we'll call it separately
+    const spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
+    const dashboardSheet = spreadsheet.getSheetByName('Dashboard');
+    
+    if (!dashboardSheet) {
+      throw new Error('Dashboard sheet not found');
+    }
+    
+    // Call customer-specific analysis
+    const result = analyzeAllCustomerOrders(dashboardSheet);
+    
+    const message = `Customer analysis updated! Processed ${result.customersProcessed || 0} unique customers, ` +
+      `updated ${result.ordersUpdated || 0} order records`;
+    
+    Logger.log(`✅ Customer update completed: ${message}`);
+    
+    return {
+      success: true,
+      customersProcessed: result.customersProcessed || 0,
+      ordersUpdated: result.ordersUpdated || 0,
+      message: message
+    };
+    
+  } catch (error) {
+    Logger.log(`❌ Customer update error: ${error.message}`);
+    SpreadsheetApp.getUi().alert('Customer Update Error', `Error: ${error.message}`, SpreadsheetApp.getUi().ButtonSet.OK);
+    throw error;
+  }
+}
+
+/**
+ * ✅ FUNCTION 5: Update Ready for Pickup
+ * Final status updates with management log overrides
+ */
+function runUpdateReadyForPickup() {
+  try {
+    Logger.log('✅ Starting ready for pickup status update...');
+    
+    // Call the main dashboard update function that handles ready status and overrides
+    mergeDataAndUpdateReadyStatus();
+    
+    const message = 'Ready for pickup status updated with management log overrides applied';
+    
+    Logger.log(`✅ Ready for pickup update completed: ${message}`);
+    
+    return {
+      success: true,
+      message: message
+    };
+    
+  } catch (error) {
+    Logger.log(`❌ Ready for pickup update error: ${error.message}`);
+    SpreadsheetApp.getUi().alert('Ready for Pickup Update Error', `Error: ${error.message}`, SpreadsheetApp.getUi().ButtonSet.OK);
+    throw error;
+  }
+}
+
+/**
+ * ========================================
+ * SUPPORTING FUNCTIONS
+ * ========================================
+ */
+
+/**
+ * Customer analysis function (extracted for individual use)
+ */
+function analyzeAllCustomerOrders(dashboardSheet) {
+  const startColumn = 1;
+  const startRow = 12;
+  const lastColumn = dashboardSheet.getLastColumn();
+  const lastRow = dashboardSheet.getLastRow();
+  
+  if (lastRow < startRow) {
+    return { customersProcessed: 0, ordersUpdated: 0 };
+  }
+  
+  const dataRange = dashboardSheet.getRange(startRow, startColumn, lastRow - startRow + 1, lastColumn);
+  const dashboardData = dataRange.getValues();
+  const dashboardHeaders = dashboardData[0];
+  
+  // Find column indices
+  const trimmedHeaders = dashboardHeaders.map(header => header ? header.toString().trim() : '');
+  const customerColIndex = trimmedHeaders.indexOf('Customer');
+  const sameCustomerOrdersColIndex = trimmedHeaders.indexOf('Same Customer Orders');
+  
+  if (customerColIndex === -1 || sameCustomerOrdersColIndex === -1) {
+    throw new Error('Required customer columns not found in Dashboard sheet');
+  }
+  
+  // Get unique customers
+  const customers = new Set();
+  for (let i = 1; i < dashboardData.length; i++) {
+    const customer = dashboardData[i][customerColIndex];
+    if (customer) {
+      customers.add(customer);
+    }
+  }
+  
+  let ordersUpdated = 0;
+  
+  // Update same customer orders count for each row
+  for (let i = 1; i < dashboardData.length; i++) {
+    const currentCustomer = dashboardData[i][customerColIndex];
+    if (!currentCustomer) continue;
+    
+    // Count orders for this customer
+    let customerOrderCount = 0;
+    for (let j = 1; j < dashboardData.length; j++) {
+      if (dashboardData[j][customerColIndex] === currentCustomer) {
+        customerOrderCount++;
+      }
+    }
+    
+    // Update the count in the sheet
+    const actualRow = startRow + i;
+    const actualCol = startColumn + sameCustomerOrdersColIndex;
+    dashboardSheet.getRange(actualRow, actualCol).setValue(customerOrderCount);
+    ordersUpdated++;
+  }
+  
+  return {
+    customersProcessed: customers.size,
+    ordersUpdated: ordersUpdated
+  };
+}
+
+/**
+ * ========================================
+ * UTILITY AND SETUP FUNCTIONS
+ * ========================================
+ */
+
+/**
+ * Setup function - run once to ensure all sheets have proper formatting
+ */
+function setupOrderManagementSystem() {
+  try {
+    Logger.log('🔧 Setting up Order Management System...');
+    
+    // Setup checkbox formatting for Management Log
+    setupManagementLogCheckboxes();
+    
+    // Setup transport sheet structure
+    setupTransportSheet();
+    
+    // Setup checkbox formatting for boolean columns
+    const spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
+    const dashboardSheet = spreadsheet.getSheetByName('Dashboard');
+    if (dashboardSheet) {
+      setupCheckboxFormatting({ dashboard: dashboardSheet });
+    }
+    
+    Logger.log('✅ Order Management System setup completed');
+    SpreadsheetApp.getUi().alert('Setup Complete', 'Order Management System has been set up successfully!', SpreadsheetApp.getUi().ButtonSet.OK);
+    
+  } catch (error) {
+    Logger.log(`❌ Setup error: ${error.message}`);
+    SpreadsheetApp.getUi().alert('Setup Error', `Error during setup: ${error.message}`, SpreadsheetApp.getUi().ButtonSet.OK);
+  }
+}
+
+/**
+ * System status check - shows current state of all sheets
+ */
+function checkSystemStatus() {
+  try {
+    Logger.log('📊 Checking Order Management System status...');
+    
+    const spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
+    const sheets = spreadsheet.getSheets();
+    
+    let statusReport = "=== ORDER MANAGEMENT SYSTEM STATUS ===\n\n";
+    
+    // Check key sheets
+    const keySheets = [
+      'Dashboard',
+      '4GV Marketplavce (All Automated)',
+      'Kingston',
+      'Medford', 
+      'Transport',
+      'Management Log',
+      'Completed Transports'
+    ];
+    
+    keySheets.forEach(sheetName => {
+      const sheet = findSheetByPartialName(spreadsheet, sheetName);
+      if (sheet) {
+        const data = sheet.getDataRange().getValues();
+        statusReport += `✅ ${sheetName}: ${data.length - 1} data rows\n`;
+      } else {
+        statusReport += `❌ ${sheetName}: NOT FOUND\n`;
+      }
+    });
+    
+    statusReport += `\nTotal sheets in spreadsheet: ${sheets.length}`;
+    statusReport += `\n\nUse runAllOrderManagementFunctions() to execute all processes.`;
+    
+    Logger.log(statusReport);
+    SpreadsheetApp.getUi().alert('System Status', statusReport, SpreadsheetApp.getUi().ButtonSet.OK);
+    
+    return statusReport;
+    
+  } catch (error) {
+    Logger.log(`❌ Status check error: ${error.message}`);
+    SpreadsheetApp.getUi().alert('Status Check Error', `Error: ${error.message}`, SpreadsheetApp.getUi().ButtonSet.OK);
+  }
+}
+
+/**
+ * Helper function to find sheet by partial name
+ */
+function findSheetByPartialName(spreadsheet, partialName) {
+  const sheets = spreadsheet.getSheets();
+  const normalizedPartial = partialName.toLowerCase();
+  
+  // Try exact match first
+  for (const sheet of sheets) {
+    if (sheet.getName().toLowerCase() === normalizedPartial) {
+      return sheet;
+    }
+  }
+  
+  // Try partial match
+  for (const sheet of sheets) {
+    if (sheet.getName().toLowerCase().includes(normalizedPartial)) {
+      return sheet;
+    }
+  }
+  
+  return null;
+}
+
+/**
+ * ========================================
+ * QUICK ACCESS MENU FUNCTIONS
+ * ========================================
+ */
+
+/**
+ * Create a custom menu in Google Sheets for easy access
+ */
+function onOpen() {
+  const ui = SpreadsheetApp.getUi();
+  ui.createMenu('Order Management System')
+    .addItem('🚀 Run All Functions', 'runAllOrderManagementFunctions')
+    .addSeparator()
+    .addItem('📊 Update Dashboard', 'runUpdateDashboard')
+    .addItem('📦 Update Drop Offs', 'runUpdateDropOffs')
+    .addItem('🚛 Update Transports', 'runUpdateTransports')
+    .addItem('👥 Update Customers', 'runUpdateCustomers')
+    .addItem('✅ Update Ready for Pickup', 'runUpdateReadyForPickup')
+    .addSeparator()
+    .addItem('🔧 Setup System', 'setupOrderManagementSystem')
+    .addItem('📊 Check Status', 'checkSystemStatus')
+    .addToUi();
+}
+
+/**
+ * ========================================
+ * EXECUTION SHORTCUTS (for testing)
+ * ========================================
+ */
+
+// Quick test functions - these can be run individually from the Apps Script editor
+
+function testDashboardUpdate() {
+  Logger.log('🧪 Testing Dashboard update...');
+  const result = runUpdateDashboard();
+  Logger.log('Test result:', JSON.stringify(result, null, 2));
+}
+
+function testDropOffsUpdate() {
+  Logger.log('🧪 Testing Drop-offs update...');
+  const result = runUpdateDropOffs();
+  Logger.log('Test result:', JSON.stringify(result, null, 2));
+}
+
+function testTransportsUpdate() {
+  Logger.log('🧪 Testing Transports update...');
+  const result = runUpdateTransports();
+  Logger.log('Test result:', JSON.stringify(result, null, 2));
+}
+
+function testCustomersUpdate() {
+  Logger.log('🧪 Testing Customers update...');
+  const result = runUpdateCustomers();
+  Logger.log('Test result:', JSON.stringify(result, null, 2));
+}
+
+function testReadyForPickupUpdate() {
+  Logger.log('🧪 Testing Ready for Pickup update...');
+  const result = runUpdateReadyForPickup();
+  Logger.log('Test result:', JSON.stringify(result, null, 2));
+}
+
+/**
+ * ========================================
+ * INCLUDE ALL EXISTING FUNCTIONS BELOW
+ * ========================================
+ * 
+ * NOTE: All your existing functions from the documents should be included here.
+ * The functions above act as controllers that call your existing functions.
+ * 
+ * Required functions that should be included:
+ * - transferAllOrdersComplete()
+ * - mergeSellerDropOffData()
+ * - runCompleteTransportSystem()
+ * - mergeDataAndUpdateReadyStatus()
+ * - setupManagementLogCheckboxes()
+ * - setupTransportSheet()
+ * - setupCheckboxFormatting()
+ * 
+ * And all their supporting functions...
+ */
