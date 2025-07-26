@@ -1,0 +1,5 @@
+ID,Seller ,Customer,Status,Order Method,Instore Pick Up OR Ship ,Start Location,End Location,Date Created,Same Customer Orders,Needs Transport,Created,Paid,Dropped Off,Transported,Ready For (Pickup or Ship),Picked Up Or Shiped,
+O9713224555,4GoodVibes Gift Shop,Gina Kolenda,,4GV Marketplace,Instore Pick,Medford,Medford,6/28/2025,1,NO,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,7/25/2025
+O8385768524,4GoodVibes Gift Shop,Jodi Hagen ,,4GV Marketplace,Instore Pick,Kingston,Medford,6/28/2025,3,YES,TRUE,TRUE,TRUE,TRUE,FALSE,TRUE,7/25/2025
+O8601442869,Clean Aura Candles,cauldronofwhimsy ,,4GV Marketplace,Instore Pick,Kingston,Medford,6/28/2025,5,YES,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,7/25/2025
+O6321719205,4GoodVibes Gift Shop,Mary L Hagen ,,4GV Marketplace,Instore Pick,Kingston,Medford,6/28/2025,2,YES,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,7/25/2025
